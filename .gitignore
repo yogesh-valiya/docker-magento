@@ -1,4 +1,4 @@
 /volumes/*
 /code/*
-!/code/adminer/*
+!/code/adminer/index.php
 /.idea/*

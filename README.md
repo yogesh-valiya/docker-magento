@@ -1,140 +1,72 @@
-# Docker Setup for Magento 2
+# Docker Setup Guide for Magento 2
 
-## Requirements
+## Prerequisites
 
-- Docker - [Install Docker](https://docs.docker.com/engine/installation/)
-- Docker Compose - [Install Docker Compose](https://docs.docker.com/compose/install/)
-- Run Docker as Non Root User
-    - [Run Docker as Non Root User](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
+Make sure you have the following installed on your system:
 
-## Disable Services on Local Machine
+- [Docker](https://docs.docker.com/engine/installation/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- Configure Docker to run as a non-root user, following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
+## Disable Local Services
+
+To prevent conflicts, stop and disable the following services on your local machine:
 
 ```shell
-# Stop and disable Apache 2
 sudo systemctl stop apache2
 sudo systemctl disable apache2
 
-# Stop and disable Nginx
 sudo systemctl stop nginx
 sudo systemctl disable nginx
 
-# Stop and disable MySQL
 sudo systemctl stop mysql
 sudo systemctl disable mysql
 
-# Stop and disable ElasticSearch
 sudo systemctl stop elasticsearch
 sudo systemctl disable elasticsearch
 
-# Stop and disable PHP-FPM (replace 7.4 with your PHP version)
 sudo systemctl stop php7.4-fpm
 sudo systemctl disable php7.4-fpm
-
 ```
-
-## Containers Configurations
-
-- MySQL 8.0
-    - Container Name - `mysql_80`
-    - Username - `root`
-    - Password - `magento`
-    - For other container
-        - Host - `mysql_80`
-        - Port - `3306`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `49200`
-- ElasticSearch 7.17.7
-    - Container name - `elasticsearch_717`
-    - For other container
-        - Host - `elasticsearch_717`
-        - Port - `9200` and `9300`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `49200` and `49300`
-- OpenSearch 2.5.0
-    - Container name - `opensearch_250`
-    - For other container
-        - Host - `opensearch_250`
-        - Port - `9200` and `9300`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `49201` and `49301`
-- PHP 7.4
-    - Container name - `php_74`
-    - For other container
-        - Host - `php_74`
-        - Port - `9000`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `49000`
-- PHP 8.2
-    - Container name - `php_82`
-    - For other container
-        - Host - `php_82`
-        - Port - `9000`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `49001`
-- Nginx Latest Version
-    - Container name - `nginx`
-    - For other container
-        - Host - `nginx`
-        - Port - `80`
-    - For local machine
-        - Host - `127.0.0.1`
-        - Port - `80`
 
 ## Folder Structure
 
-- `docker-compose.yml`
-  - This file contains all the container configuration including port and volume mapping
-- `volume/`
-  - This directory has volumes for containers like MySQL, ElasticSearch, OpenSearch, PHP and Nginx
-- `code/`
-  - This directory has code to mount in PHP and Nginx container. This directory will contain Magento 2 codebase.
-    - `code/adminer/` - directory to Adminer files
-    - `code/misc/` - directory to miscellaneous files. For example, put database dump in this directory and later it will be accessible in PHP container at `/var/www/html/misc/`
-- `config/`
-  - This directory has Nginx configuration file for virtual host and Magento 2 Nginx related stuff.
-- `images/`
-  - This directory has Docker images
-- `backups/`
-  - This directory will hold database backups
+- `docker-compose.yml`: Container configurations, including port and volume mapping.
+- `volume/`: Volumes for containers (MySQL, ElasticSearch, OpenSearch, PHP, and Nginx).
+- `code/`: Magento 2 codebase and related files.
+    - `code/adminer/`: Adminer files.
+    - `code/misc/`: Miscellaneous files, e.g., database dumps.
+- `config/`: Nginx configuration and Magento 2-related files.
+- `images/`: Docker images.
+- `backups/`: Database backup directory.
 
 ## Installation
 
-### Setup Docker
+### Set Up Docker
 
-1. Follow links given above to install `docker` and `docker-compose`.
+1. Install [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/).
 2. Run `docker-compose up -d` to start all containers.
 
-### Setup Adminer
+### Set Up Adminer
 
-1. Make sure `code/adminer/index.php` file exist.
-2. Add `127.0.0.1 adminer.local` in `/etc/hosts` file.
-3. Try accessing `http://adminer.local` in browser.
+1. Ensure `code/adminer/index.php` exists.
+2. Add `127.0.0.1 adminer.local` to `/etc/hosts`.
+3. Access [http://adminer.local](http://adminer.local) in your browser.
 
-### Setup Magento 2
+### Set Up Magento 2
 
-#### Setup Codebase
+#### Set Up Codebase
 
-1. Create new directory under `code/` directory.
-2. Copy Magento 2 codebase to the directory created in step 1.
-3. Add below code in `config/nginx-virtual-hosts.conf` file. Make sure to replace `server_name`, `$FASTCGI_PASS`
-   and `$MAGE_ROOT` variables.
+1. Create a new directory under `code/`.
+2. Copy Magento 2 codebase to the new directory.
+3. Add the following code to `config/nginx-virtual-hosts.conf`. Replace variables as needed.
 
 ```nginx
 server {
     listen 80;
-
-    ### Change `magento-docker.local` to your domain name
-    ### Use `php_82` for PHP 8.2 and PHP_74 for PHP 7.4
-    ### Change `magento-docker` to your Magento 2 codebase directory
-    server_name magento-docker.local;
-    set $FASTCGI_PASS php_82:9000;
-    set $MAGE_ROOT /var/www/html/magento-docker;
-
+    server_name magento-docker.local; # replace with your domain
+    set $FASTCGI_PASS php_82:9000; # replace with php_74 for PHP 7.4
+    set $MAGE_ROOT /var/www/html/magento-docker; # replace with your Magento 2 root directory
     set $MAGE_MODE developer;
 
     access_log /var/log/nginx/magento-access.log;
@@ -144,51 +76,57 @@ server {
 }
 ```
 
-4. Add `127.0.0.1 magento-docker.local` in `/etc/hosts` file. Replace domain name with your domain.
-5. Run `bin/restart.sh nginx` to restart Nginx container.
-6. Update app/etc/env.php with DB config
-    1. Update `host` with `mysql_80:3306`
-    2. Update `dbname` with your DB name
-    3. Update `username` with `root`
-    4. Update `password` with `magento`
+4. Add `127.0.0.1 magento-docker.local` to `/etc/hosts` (replace domain with your domain).
+5. Run `bin/restart.sh nginx` to restart the Nginx container.
+6. Update `app/etc/env.php` with database configuration.
 
-### Setup Database
+### Set Up Database
 
-1. Create new directory if not exist - `code/misc/`.
-2. Copy database dump to `code/misc/`
-3. Connect to PHP container with command - `./bin/shell.sh php_74`
-4. Run below command to create database. Replace `magento_latest` with your database name.
-   ```
-   mysql -h mysql_80 -u root -p -e "CREATE DATABASE magento_latest;"
-   ```
-5. Run below command to import database dump. Replace `magento_latest` with your database name and `magento_latest.sql` with your
-   database dump file name
-    ```
-    mysql -h mysql_80 -u root -p magento_latest < /var/www/html/misc/magento_latest.sql
-    ```
-6. Update ElasticSearch / OpenSearch config
-   ```
-    UPDATE `core_config_data` SET `value` = 'elasticsearch_717' WHERE `path` = 'catalog/search/elasticsearch7_server_hostname'; # for ElasticSearch
-    UPDATE `core_config_data` SET `value` = 'opensearch_250' WHERE `path` = 'catalog/search/elasticsearch7_server_hostname'; # for OpenSearch
-    UPDATE `core_config_data` SET `value` = '9200' WHERE `path` = 'catalog/search/elasticsearch7_server_port';
-    ```
+1. Create `code/misc/` directory if not exists.
+2. Copy the database dump to `code/misc/`.
+3. Connect to the PHP container with `./bin/shell.sh php_74`.
+4. Create the database:
+
+```bash
+mysql -h mysql_80 -u root -p -e "CREATE DATABASE magento_db;"
+```
+
+5. Import the database dump:
+
+```bash
+mysql -h mysql_80 -u root -p magento_db < /var/www/html/misc/magento_db.sql
+```
+
+6. Update ElasticSearch / OpenSearch configuration:
+
+```bash
+UPDATE `core_config_data` SET `value` = 'elasticsearch_717' WHERE `path` = 'catalog/search/elasticsearch7_server_hostname'; # for ElasticSearch
+UPDATE `core_config_data` SET `value` = 'opensearch_250' WHERE `path` = 'catalog/search/elasticsearch7_server_hostname'; # for OpenSearch
+UPDATE `core_config_data` SET `value` = '9200' WHERE `path` = 'catalog/search/elasticsearch7_server_port';
+```
+
+## Usages
+#### How to run Magento commands?
+To run Magento 2 commands, connect to the PHP container with `./bin/shell.sh php_74` or `./bin/shell.sh php_82` and run the commands as usual.
 
 ## Useful Commands
 
 ### Docker
 
-- Stop all docker containers - `docker stop $(docker ps -a -q)`
-- Remove all docker containers - `docker rm $(docker ps -a -q)`
+- Stop all docker containers: `docker stop $(docker ps -a -q)`
+- Remove all docker containers: `docker rm $(docker ps -a -q)`
 
 ### ElasticSearch
 
-- Run this command to check ElasticSearch status - `curl 127.0.0.1:49200`.
-- Run this command to check OpenSearch status - `curl 127.0.0.1:49201`.
+- Check ElasticSearch status: `curl 127.0.0.1:49200`
+- Check OpenSearch status: `curl 127.0.0.1:49201`
 
-## General Troubleshooting
+## Troubleshooting
 
-- If any container is not working, then try stop that container first and start again without `-d` flag. This will show
-  exact reason for failure.
-- If getting
-  error `ElasticsearchException[failed to bind service]; nested: AccessDeniedException[/usr/share/elasticsearch/data/nodes]`
-  , then try to give write permission to `volumes/` directory - `sudo chmod -R 777 volumes/`
+- If any container fails, stop it first and start again without the `-d` flag for detailed error messages.
+- For the `ElasticsearchException` error, grant write permission to the `volumes/` directory: `sudo chmod -R 777 volumes/`
+#### Getting port not available error
+If getting errror similar to below, then it means that the port is already in use. To fix this, you can either stop the service using that port or change the port in `docker-compose.yml` file.
+```bash
+Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
+```
