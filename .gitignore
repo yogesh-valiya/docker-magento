@@ -1,0 +1,3 @@
+/volumes/*
+/code/*
+!/code/adminer/*
