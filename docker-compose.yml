@@ -8,7 +8,7 @@ services:
             dockerfile: ./Dockerfile
         restart: unless-stopped
         volumes:
-            - ./volumes/opensearch/2.5.0:/usr/share/opensearch/data
+            - opensearch_250:/usr/share/opensearch/data
         ports:
             - "49201:9200"
             - "49301:9300"
@@ -32,7 +32,7 @@ services:
             dockerfile: ./Dockerfile
         restart: unless-stopped
         volumes:
-            - ./volumes/elasticsearch/7.17.7:/usr/share/elasticsearch/data
+            - elasticsearch_717:/usr/share/elasticsearch/data
         ports:
             - "49200:9200"
             - "49300:9300"
@@ -66,8 +66,7 @@ services:
                     cpus: '0.50'
                     memory: 1G
         volumes:
-            - ./volumes/mysql/8.0:/var/lib/mysql
-            - ./code/misc/:/var/temp/
+            - mysql_80:/var/lib/mysql
         networks:
             - magento-network
 
@@ -80,7 +79,8 @@ services:
         ports:
             - "49000:9000"
         volumes:
-            - ./code:/var/www/html
+            - "${DOCUMENT_ROOT}:/var/www/html"
+            - ./code/adminer:/var/www/html/adminer
         networks:
             - magento-network
 
@@ -93,7 +93,8 @@ services:
         ports:
             - "49001:9000"
         volumes:
-            - ./code:/var/www/html
+            - "${DOCUMENT_ROOT}:/var/www/html"
+            - ./code/adminer:/var/www/html/adminer
         networks:
             - magento-network
 
@@ -106,17 +107,12 @@ services:
         ports:
             - "80:80"
         volumes:
-            - ./code:/var/www/html
+            - "${DOCUMENT_ROOT}:/var/www/html"
+            - ./code/adminer:/var/www/html/adminer
             - ./config/nginx-virtual-hosts.conf:/etc/nginx/conf.d/default.conf
             - ./config/magento-virtual-host.conf:/tmp/nginx.conf
         networks:
             - magento-network
-        links:
-            - php_74
-            - php_82
-            - opensearch_250
-            - elasticsearch_717
-            - mysql_80
 
 networks:
     magento-network:
@@ -124,7 +120,6 @@ networks:
         enable_ipv6: false
 
 volumes:
-    opensearch:
-        driver: local
-    mysql:
-        driver: local
+    opensearch_250:
+    elasticsearch_717:
+    mysql_80:

@@ -6,7 +6,9 @@ Make sure you have the following installed on your system:
 
 - [Docker](https://docs.docker.com/engine/installation/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
-- Configure Docker to run as a non-root user, following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+- Configure Docker to run as a non-root user,
+  following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
+  .
 
 ## Disable Local Services
 
@@ -33,9 +35,7 @@ sudo systemctl disable php7.4-fpm
 
 - `docker-compose.yml`: Container configurations, including port and volume mapping.
 - `volume/`: Volumes for containers (MySQL, ElasticSearch, OpenSearch, PHP, and Nginx).
-- `code/`: Magento 2 codebase and related files.
-    - `code/adminer/`: Adminer files.
-    - `code/misc/`: Miscellaneous files, e.g., database dumps.
+- `code/adminer/`: Adminer files.
 - `config/`: Nginx configuration and Magento 2-related files.
 - `images/`: Docker images.
 - `backups/`: Database backup directory.
@@ -44,8 +44,15 @@ sudo systemctl disable php7.4-fpm
 
 ### Set Up Docker
 
-1. Install [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/).
-2. Run `docker-compose up -d` to start all containers.
+1. Install [docker](https://docs.docker.com/engine/installation/)
+   and [docker-compose](https://docs.docker.com/compose/install/).
+2. Configure Docker to run as a non-root user,
+   following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
+   .
+3. Update `DOCUMENT_ROOT` value in `.env` file with absolute path of the codebase parent directory.
+    1. Later on all the codebase will be inside this directory.
+    2. This directory will be accessible inside the container at `/var/www/html/`.
+4. Run `docker-compose up -d` to start all containers.
 
 ### Set Up Adminer
 
@@ -57,16 +64,19 @@ sudo systemctl disable php7.4-fpm
 
 #### Set Up Codebase
 
-1. Create a new directory under `code/`.
+1. Create a new directory under `DOCUMENT_ROOT` path mentioned in `.env` file.
 2. Copy Magento 2 codebase to the new directory.
 3. Add the following code to `config/nginx-virtual-hosts.conf`. Replace variables as needed.
+   1. Replace `magento-docker.local` with your domain.
+   2. Use `php_74:9000` for PHP 7.4 and `php_82:9000` for PHP 8.2.
+   3. Replace `/var/www/html/magento-docker` with your `/var/www/html/<your_directory>`.
 
 ```nginx
 server {
     listen 80;
-    server_name magento-docker.local; # replace with your domain
-    set $FASTCGI_PASS php_82:9000; # replace with php_74 for PHP 7.4
-    set $MAGE_ROOT /var/www/html/magento-docker; # replace with your Magento 2 root directory
+    server_name magento-docker.local;
+    set $FASTCGI_PASS php_82:9000;
+    set $MAGE_ROOT /var/www/html/magento-docker;
     set $MAGE_MODE developer;
 
     access_log /var/log/nginx/magento-access.log;
@@ -106,8 +116,11 @@ UPDATE `core_config_data` SET `value` = '9200' WHERE `path` = 'catalog/search/el
 ```
 
 ## Usages
+
 #### How to run Magento commands?
-To run Magento 2 commands, connect to the PHP container with `./bin/shell.sh php_74` or `./bin/shell.sh php_82` and run the commands as usual.
+
+To run Magento 2 commands, connect to the PHP container with `./bin/shell.sh php_74` or `./bin/shell.sh php_82` and run
+the commands as usual.
 
 ## Useful Commands
 
@@ -124,9 +137,14 @@ To run Magento 2 commands, connect to the PHP container with `./bin/shell.sh php
 ## Troubleshooting
 
 - If any container fails, stop it first and start again without the `-d` flag for detailed error messages.
-- For the `ElasticsearchException` error, grant write permission to the `volumes/` directory: `sudo chmod -R 777 volumes/`
+- For the `ElasticsearchException` error, grant write permission to the `volumes/`
+  directory: `sudo chmod -R 777 volumes/`
+
 #### Getting port not available error
-If getting errror similar to below, then it means that the port is already in use. To fix this, you can either stop the service using that port or change the port in `docker-compose.yml` file.
+
+If getting errror similar to below, then it means that the port is already in use. To fix this, you can either stop the
+service using that port or change the port in `docker-compose.yml` file.
+
 ```bash
 Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
 ```
