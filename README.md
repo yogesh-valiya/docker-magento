@@ -71,20 +71,20 @@ sudo systemctl disable php7.4-fpm
    2. Use `php_74:9000` for PHP 7.4 and `php_82:9000` for PHP 8.2.
    3. Replace `/var/www/html/magento-docker` with your `/var/www/html/<your_directory>`.
 
-```nginx
-server {
-    listen 80;
-    server_name magento-docker.local;
-    set $FASTCGI_PASS php_82:9000;
-    set $MAGE_ROOT /var/www/html/magento-docker;
-    set $MAGE_MODE developer;
-
-    access_log /var/log/nginx/magento-access.log;
-    error_log /var/log/nginx/magento-error.log;
-
-    include /tmp/nginx.conf;
-}
-```
+    ```nginx
+    server {
+        listen 80;
+        server_name magento-docker.local;
+        set $FASTCGI_PASS php_82:9000;
+        set $MAGE_ROOT /var/www/html/magento-docker;
+        set $MAGE_MODE developer;
+    
+        access_log /var/log/nginx/magento-access.log;
+        error_log /var/log/nginx/magento-error.log;
+    
+        include /etc/nginx/magento-host.conf;
+    }
+    ```
 
 4. Add `127.0.0.1 magento-docker.local` to `/etc/hosts` (replace domain with your domain).
 5. Run `bin/restart.sh nginx` to restart the Nginx container.
@@ -136,15 +136,67 @@ the commands as usual.
 
 ## Troubleshooting
 
-- If any container fails, stop it first and start again without the `-d` flag for detailed error messages.
-- For the `ElasticsearchException` error, grant write permission to the `volumes/`
-  directory: `sudo chmod -R 777 volumes/`
+##### A container is not working?
+- Check container status with `./bin/status.sh`.
+- If it's not running, start it with `docker-compose up <container_name>`. This will show detailed exectuion of container including error message if any.
 
 #### Getting port not available error
-
 If getting errror similar to below, then it means that the port is already in use. To fix this, you can either stop the
 service using that port or change the port in `docker-compose.yml` file.
 
 ```bash
 Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
 ```
+
+## Containers Configurations
+
+- MySQL 8.0
+    - Container Name - `mysql_80`
+    - Username - `root`
+    - Password - `magento`
+    - For other container
+        - Host - `mysql_80`
+        - Port - `3306`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `49200`
+- ElasticSearch 7.17.7
+    - Container name - `elasticsearch_717`
+    - For other container
+        - Host - `elasticsearch_717`
+        - Port - `9200` and `9300`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `49200` and `49300`
+- OpenSearch 2.5.0
+    - Container name - `opensearch_250`
+    - For other container
+        - Host - `opensearch_250`
+        - Port - `9200` and `9300`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `49201` and `49301`
+- PHP 7.4
+    - Container name - `php_74`
+    - For other container
+        - Host - `php_74`
+        - Port - `9000`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `49000`
+- PHP 8.2
+    - Container name - `php_82`
+    - For other container
+        - Host - `php_82`
+        - Port - `9000`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `49001`
+- Nginx Latest Version
+    - Container name - `nginx`
+    - For other container
+        - Host - `nginx`
+        - Port - `80`
+    - For local machine
+        - Host - `127.0.0.1`
+        - Port - `80`

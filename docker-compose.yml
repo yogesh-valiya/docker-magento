@@ -101,16 +101,14 @@ services:
     nginx:
         container_name: "nginx"
         build:
-            context: ./images/nginx
-            dockerfile: ./Dockerfile
+            context: .
+            dockerfile: ./images/nginx/Dockerfile
         restart: unless-stopped
         ports:
             - "80:80"
         volumes:
             - "${DOCUMENT_ROOT}:/var/www/html"
             - ./code/adminer:/var/www/html/adminer
-            - ./config/nginx-virtual-hosts.conf:/etc/nginx/conf.d/default.conf
-            - ./config/magento-virtual-host.conf:/tmp/nginx.conf
         networks:
             - magento-network
 
