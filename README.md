@@ -2,109 +2,102 @@
 
 ## Prerequisites
 
+### Install Docker
 Make sure you have the following installed on your system:
 
-- [Docker](https://docs.docker.com/engine/installation/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- Install [Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+- Install [Docker Compose](https://docs.docker.com/compose/install/linux/#install-using-the-repository)
 - Configure Docker to run as a non-root user,
-  following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-  .
+  following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
 
-## Disable Local Services
+### Disable Local Services
 
 To prevent conflicts, stop and disable the following services on your local machine:
 
 ```shell
-sudo systemctl stop apache2
-sudo systemctl disable apache2
-
-sudo systemctl stop nginx
-sudo systemctl disable nginx
-
-sudo systemctl stop mysql
-sudo systemctl disable mysql
-
-sudo systemctl stop elasticsearch
-sudo systemctl disable elasticsearch
-
-sudo systemctl stop php7.4-fpm
-sudo systemctl disable php7.4-fpm
+sudo systemctl stop apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm php8.2-fpm
+sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm php8.2-fpm
 ```
 
 ## Folder Structure
 
-- `docker-compose.yml`: Container configurations, including port and volume mapping.
-- `volume/`: Volumes for containers (MySQL, ElasticSearch, OpenSearch, PHP, and Nginx).
-- `code/adminer/`: Adminer files.
-- `config/`: Nginx configuration and Magento 2-related files.
-- `images/`: Docker images.
+- `.env` - Has a flag `DOCUMENT_ROOT` path, which holds the path of the magento instances.
 - `backups/`: Database backup directory.
+- `code/adminer/`: Has adminer files.
+- `images/`: Docker images.
+- `bin/`: Has utility commands to mana .
+- `docker-compose.yml`: Container configurations, including port and volume mapping.
 
 ## Installation
 
 ### Set Up Docker
 
-1. Install [docker](https://docs.docker.com/engine/installation/)
-   and [docker-compose](https://docs.docker.com/compose/install/).
-2. Configure Docker to run as a non-root user,
-   following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-   .
-3. Update `DOCUMENT_ROOT` value in `.env` file with absolute path of the codebase parent directory.
+1. Install Docker as described [here](#install-docker).
+2. Update `DOCUMENT_ROOT` value in `.env` file with absolute path of the codebase parent directory.
     1. Later on all the codebase will be inside this directory.
     2. This directory will be accessible inside the container at `/var/www/html/`.
-4. Run `docker-compose up -d` to start all containers.
+3. Run `./bin/build.sh` to build all containers.
+4. Run `./bin/start.sh` to start all containers.
 
 ### Set Up Adminer
 
 1. Ensure `code/adminer/index.php` exists.
 2. Add `127.0.0.1 adminer.local` to `/etc/hosts`.
 3. Access [http://adminer.local](http://adminer.local) in your browser.
+   1. Host: `mysql_80:3306`
+   2. User: `root`
+   3. Password: `magento`
+
 
 ### Set Up Magento 2
 
 #### Set Up Codebase
 
 1. Create a new directory under `DOCUMENT_ROOT` path mentioned in `.env` file.
-2. Copy Magento 2 codebase to the new directory.
-3. Add the following code to `config/nginx-virtual-hosts.conf`. Replace variables as needed.
-   1. Replace `magento-docker.local` with your domain.
-   2. Use `php_74:9000` for PHP 7.4 and `php_82:9000` for PHP 8.2.
-   3. Replace `/var/www/html/magento-docker` with your `/var/www/html/<your_directory>`.
+2. Copy Magento 2 codebase to the new directory created in step 1.
+3. Create a new file under `<DOCUMENT_ROOT>/nginx/virtual-hosts/magento-simple.conf` and add below content.
 
     ```nginx
     server {
         listen 80;
-        server_name magento-docker.local;
-        set $FASTCGI_PASS php_82:9000;
+        server_name magento-simple.local;
+        set $FASTCGI_PASS php_82;
         set $MAGE_ROOT /var/www/html/magento-docker;
+
         set $MAGE_MODE developer;
     
         access_log /var/log/nginx/magento-access.log;
         error_log /var/log/nginx/magento-error.log;
     
-        include /etc/nginx/magento-host.conf;
+        include /etc/nginx/default-magento.conf;
     }
     ```
+    1. The conf file name should be same as the directory name.
+    2. Replace `magento-simple.local` with your domain.
+    3. Use `php_74` for PHP 7.4 and `php_82` for PHP 8.2.
+    4. Replace `/var/www/html/magento-docker` with your `/var/www/html/<your_directory>`.
 
-4. Add `127.0.0.1 magento-docker.local` to `/etc/hosts` (replace domain with your domain).
+4. Add `127.0.0.1 magento-simple.local` to `/etc/hosts` (replace domain with your domain).
 5. Run `bin/restart.sh nginx` to restart the Nginx container.
 6. Update `app/etc/env.php` with database configuration.
+   1. Host: `mysql_80:3306`
+   2. User: `root`
+   3. Password: `magento`
 
 ### Set Up Database
 
-1. Create `code/misc/` directory if not exists.
-2. Copy the database dump to `code/misc/`.
-3. Connect to the PHP container with `./bin/shell.sh php_74`.
-4. Create the database:
+1. Copy the database dump to `DOCUMENT_ROOT` directory.
+2. Connect to the PHP container with `./bin/shell.sh php_74`.
+3. Create the database with below query (replace `magento_simple` with your database name
 
 ```bash
-mysql -h mysql_80 -u root -p -e "CREATE DATABASE magento_db;"
+mysql -h mysql_80 -u root -p -e "CREATE DATABASE magento_simple;"
 ```
 
-5. Import the database dump:
+5. Import the database dump with below query (replace `magento_simple` with your database name)
 
 ```bash
-mysql -h mysql_80 -u root -p magento_db < /var/www/html/misc/magento_db.sql
+mysql -h mysql_80 -u root -p magento_simple < /var/www/html/misc/magento_simple.sql
 ```
 
 6. Update ElasticSearch / OpenSearch configuration:

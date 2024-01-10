@@ -24,4 +24,6 @@ COPY conf/php.ini $PHP_INI_DIR
 COPY conf/php-fpm.conf /usr/local/etc/
 COPY conf/www.conf /usr/local/etc/php-fpm.d/
 
+RUN mkdir -p /var/www/adminer
+
 EXPOSE 9000

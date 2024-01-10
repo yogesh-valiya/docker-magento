@@ -80,7 +80,7 @@ services:
             - "49000:9000"
         volumes:
             - "${DOCUMENT_ROOT}:/var/www/html"
-            - ./code/adminer:/var/www/html/adminer
+            - ./code/adminer:/var/www/adminer
         networks:
             - magento-network
 
@@ -94,23 +94,28 @@ services:
             - "49001:9000"
         volumes:
             - "${DOCUMENT_ROOT}:/var/www/html"
-            - ./code/adminer:/var/www/html/adminer
+            - ./code/adminer:/var/www/adminer
         networks:
             - magento-network
 
     nginx:
         container_name: "nginx"
         build:
-            context: .
-            dockerfile: ./images/nginx/Dockerfile
+            context: ./images/nginx
+            dockerfile: ./Dockerfile
         restart: unless-stopped
         ports:
             - "80:80"
         volumes:
+            - ./code/adminer:/var/www/adminer
             - "${DOCUMENT_ROOT}:/var/www/html"
-            - ./code/adminer:/var/www/html/adminer
+            - "${DOCUMENT_ROOT}/nginx/virtual-hosts:/etc/nginx/magento/virtual-hosts"
+            - "${DOCUMENT_ROOT}/nginx/magento-config:/etc/nginx/magento/magento-config"
         networks:
             - magento-network
+        depends_on:
+            - php_74
+            - php_82
 
 networks:
     magento-network:

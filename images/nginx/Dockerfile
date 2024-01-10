@@ -2,12 +2,16 @@ FROM nginx:latest
 
 WORKDIR /var/www/html
 
-RUN mkdir -p /var/www/html/adminer
 RUN apt-get update
 RUN apt-get install curl telnet nano -y
 
-COPY ./config/nginx-virtual-hosts.conf /etc/nginx/conf.d/default.conf
-COPY ./config/magento-host.conf /etc/nginx/magento-host.conf
+RUN mkdir -p /var/www/adminer
+RUN mkdir -p /etc/nginx/magento/virtual-hosts
+RUN mkdir -p /etc/nginx/magento/magento-config
+
+COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+COPY ./conf/adminer-vhost.conf /etc/nginx/conf.d/adminer-vhost.conf
+COPY ./conf/default-magento.conf /etc/nginx/default-magento.conf
 
 EXPOSE 80
 
