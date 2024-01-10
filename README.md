@@ -25,6 +25,11 @@ sudo systemctl disable mysql
 # Stop and disable ElasticSearch
 sudo systemctl stop elasticsearch
 sudo systemctl disable elasticsearch
+
+# Stop and disable PHP-FPM (replace 7.4 with your PHP version)
+sudo systemctl stop php7.4-fpm
+sudo systemctl disable php7.4-fpm
+
 ```
 
 ## Containers Configurations
@@ -123,12 +128,12 @@ sudo systemctl disable elasticsearch
 server {
     listen 80;
 
-    ### Change `hoya-docker.local` to your domain name
+    ### Change `magento-docker.local` to your domain name
     ### Use `php_82` for PHP 8.2 and PHP_74 for PHP 7.4
-    ### Change `hoya-docker` to your Magento 2 codebase directory
-    server_name hoya-docker.local;
+    ### Change `magento-docker` to your Magento 2 codebase directory
+    server_name magento-docker.local;
     set $FASTCGI_PASS php_82:9000;
-    set $MAGE_ROOT /var/www/html/hoya-docker;
+    set $MAGE_ROOT /var/www/html/magento-docker;
 
     set $MAGE_MODE developer;
 
@@ -139,7 +144,7 @@ server {
 }
 ```
 
-4. Add `127.0.0.1 hoya-docker.local` in `/etc/hosts` file. Replace domain name with your domain.
+4. Add `127.0.0.1 magento-docker.local` in `/etc/hosts` file. Replace domain name with your domain.
 5. Run `bin/restart.sh nginx` to restart Nginx container.
 6. Update app/etc/env.php with DB config
     1. Update `host` with `mysql_80:3306`
@@ -152,14 +157,14 @@ server {
 1. Create new directory if not exist - `code/misc/`.
 2. Copy database dump to `code/misc/`
 3. Connect to PHP container with command - `./bin/shell.sh php_74`
-4. Run below command to create database. Replace `halp_old` with your database name.
+4. Run below command to create database. Replace `magento_latest` with your database name.
    ```
-   mysql -h mysql_80 -u root -p -e "CREATE DATABASE halp_old;"
+   mysql -h mysql_80 -u root -p -e "CREATE DATABASE magento_latest;"
    ```
-5. Run below command to import database dump. Replace `halp_old` with your database name and `halp_old.sql` with your
+5. Run below command to import database dump. Replace `magento_latest` with your database name and `magento_latest.sql` with your
    database dump file name
     ```
-    mysql -h mysql_80 -u root -p halp_old < /var/www/html/misc/halp_old.sql
+    mysql -h mysql_80 -u root -p magento_latest < /var/www/html/misc/magento_latest.sql
     ```
 6. Update ElasticSearch / OpenSearch config
    ```
