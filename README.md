@@ -144,10 +144,19 @@ Run below command and try again
 rm  ~/.docker/config.json 
 ```
 
+#### Failed to bind port - address already in use
+![image](https://github.com/yogesh-valiya/docker-magento/assets/66505755/4ab4aec5-36c3-426f-ab51-9b83474f7e8a)
+
+Try to stop all docker containers
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+```
 
 ```bash
 Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
 ```
+Try to see if any service 
 
 ## Containers Configurations
 
