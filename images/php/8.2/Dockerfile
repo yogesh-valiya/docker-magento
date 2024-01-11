@@ -24,6 +24,9 @@ COPY conf/php.ini $PHP_INI_DIR
 COPY conf/php-fpm.conf /usr/local/etc/
 COPY conf/www.conf /usr/local/etc/php-fpm.d/
 
-RUN mkdir -p /var/www/adminer
+RUN mkdir -p /adminer
+RUN wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql-en.php -O /adminer/index.php
+
+RUN mkdir -p /app
 
 EXPOSE 9000
