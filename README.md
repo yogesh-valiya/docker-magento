@@ -119,6 +119,17 @@ the commands as usual.
 
 ### Docker
 
+#### `bin/build.sh`
+This will rebuild the images. Run this command if anything is changes in `images/` directory. 
+Takes container name as a argument, avoid passing it to build image for all conatiner. 
+#### `bin/remove.sh`
+#### `bin/restart.sh`
+#### `bin/run.sh`
+#### `bin/shell.sh`
+#### `bin/start.sh`
+#### `bin/status.sh`
+#### `bin/stop.sh`
+
 - Stop all docker containers: `docker stop $(docker ps -a -q)`
 - Remove all docker containers: `docker rm $(docker ps -a -q)`
 
@@ -129,7 +140,7 @@ the commands as usual.
 
 ## Troubleshooting
 
-##### A container is not working?
+#### A container is not working?
 - Check container status with `./bin/status.sh`.
 - If it's not running, start it with `docker-compose up <container_name>`. This will show detailed exectuion of container including error message if any.
 
