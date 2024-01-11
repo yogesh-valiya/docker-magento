@@ -9,7 +9,7 @@ RUN apt-get install -y cron default-mysql-client git gnupg gzip libbz2-dev libfr
 RUN apt-get install -y nano libjpeg62-turbo-dev libmagickwand-dev libmcrypt-dev libonig-dev libpng-dev
 RUN apt-get install -y libpng-dev libsodium-dev libssh2-1-dev libwebp-dev libxslt1-dev libzip-dev lsof
 RUN apt-get install -y mailutils msmtp nodejs procps vim zip
-RUN apt-get install -y net-tools
+RUN apt-get install -y net-tools wget nano
 
 RUN pecl channel-update pecl.php.net && pecl install imagick redis ssh2-1.3.1 xdebug
 

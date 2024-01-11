@@ -21,7 +21,7 @@ done
 
 # Set variables
 DATE=$(date +"%Y%m%d_%H%M%S")
-BACKUP_DIR="${DOCUMENT_ROOT}/backups/db/${DATE}"
+BACKUP_DIR="${CODEBASE_PARENT_DIRECTORY}/backups/db/${DATE}"
 MYSQL_CONTAINER_NAME="mysql_80"
 MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD}"
 

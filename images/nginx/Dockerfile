@@ -3,7 +3,7 @@ FROM nginx:latest
 WORKDIR /var/www/html
 
 RUN apt-get update
-RUN apt-get install curl telnet nano -y
+RUN apt-get install curl telnet nano wget -y
 
 RUN mkdir -p /adminer
 RUN wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql-en.php -O /adminer/index.php

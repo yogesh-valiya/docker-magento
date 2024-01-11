@@ -79,7 +79,7 @@ services:
         ports:
             - "49000:9000"
         volumes:
-            - "${DOCUMENT_ROOT}:/app"
+            - "${CODEBASE_PARENT_DIRECTORY}:/app"
             - ./code/adminer:/var/www/adminer
         networks:
             - magento-network
@@ -93,7 +93,7 @@ services:
         ports:
             - "49001:9000"
         volumes:
-            - "${DOCUMENT_ROOT}:/app"
+            - "${CODEBASE_PARENT_DIRECTORY}:/app"
             - ./code/adminer:/var/www/adminer
         networks:
             - magento-network
@@ -108,9 +108,9 @@ services:
             - "80:80"
         volumes:
             - ./code/adminer:/var/www/adminer
-            - "${DOCUMENT_ROOT}:/app"
-            - "${DOCUMENT_ROOT}/nginx/virtual-hosts:/etc/nginx/magento/virtual-hosts"
-            - "${DOCUMENT_ROOT}/nginx/magento-config:/etc/nginx/magento/magento-config"
+            - "${CODEBASE_PARENT_DIRECTORY}:/app"
+            - "${CODEBASE_PARENT_DIRECTORY}/nginx/virtual-hosts:/etc/nginx/magento/virtual-hosts"
+            - "${CODEBASE_PARENT_DIRECTORY}/nginx/magento-config:/etc/nginx/magento/magento-config"
         networks:
             - magento-network
         depends_on:

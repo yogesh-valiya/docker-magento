@@ -27,7 +27,7 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
 ### Set Up Docker
 
 1. Install Docker as described [here](#install-docker).
-2. Update `DOCUMENT_ROOT` value in `.env` file with absolute path of the codebase parent directory.
+2. Update `CODEBASE_PARENT_DIRECTORY` value in `.env` file with absolute path of the codebase parent directory.
     1. Later on all the codebase will be inside this directory.
     2. This directory will be accessible inside the container at `/var/www/html/`.
 3. Run docker build command
@@ -61,9 +61,9 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
 
 > Replace container path `/app/magento-simple` with your container path in below format `/app/<your_directory>`
 
-1. Create a new directory `magento-simple` under `DOCUMENT_ROOT` path mentioned in `.env` file and copy Magento 2
+1. Create a new directory `magento-simple` under `CODEBASE_PARENT_DIRECTORY` path mentioned in `.env` file and copy Magento 2
    codebase to the new directory.
-2. Create a new file under `<DOCUMENT_ROOT>/nginx/virtual-hosts/` named `magento-simple.conf` and add below content.
+2. Create a new file under `<CODEBASE_PARENT_DIRECTORY>/nginx/virtual-hosts/` named `magento-simple.conf` and add below content.
     1. Replace `magento-simple.local` with your domain.
     2. Use `php_74` for PHP 7.4 and `php_82` for PHP 8.2.
     3. Replace `/app/magento-simple` with your `/app/<directory_name>`.
@@ -107,7 +107,7 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
 
 > Replace DB dump path `/app/magento_simple.sql` with you DB dump path in your container.
 
-1. Copy the database dump to `DOCUMENT_ROOT` directory.
+1. Copy the database dump to `CODEBASE_PARENT_DIRECTORY` directory.
 2. Connect to the PHP container.
     ```shell
     ./bin/shell.sh php_74
@@ -144,7 +144,7 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
 ### `.env`
 
 - This file contains environment variables for the project.
-- `DOCUMENT_ROOT`: Absolute path of the codebase parent directory.
+- `CODEBASE_PARENT_DIRECTORY`: Absolute path of the codebase parent directory.
 - `MYSQL_USER`: MySQL username for the project.
 - `MYSQL_PASSWORD`: MySQL password for the project.
 - `MYSQL_ROOT_PASSWORD`: MySQL database root password.
