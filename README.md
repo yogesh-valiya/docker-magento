@@ -137,6 +137,14 @@ the commands as usual.
 If getting errror similar to below, then it means that the port is already in use. To fix this, you can either stop the
 service using that port or change the port in `docker-compose.yml` file.
 
+#### Failed to load metadata issue when running `./bin/build.sh` or `docker-compose up`
+![image](https://github.com/yogesh-valiya/docker-magento/assets/66505755/bc004f83-552a-434e-b90a-4cff6edc2c3f)
+Run below command and try again
+```
+rm  ~/.docker/config.json 
+```
+
+
 ```bash
 Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
 ```
