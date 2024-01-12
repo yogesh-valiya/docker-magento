@@ -1,7 +1,5 @@
 FROM php:8.2-fpm
 
-WORKDIR /var/www/html
-
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 
 RUN apt-get update
@@ -10,6 +8,8 @@ RUN apt-get install -y nano libjpeg62-turbo-dev libmagickwand-dev libmcrypt-dev 
 RUN apt-get install -y libpng-dev libsodium-dev libssh2-1-dev libwebp-dev libxslt1-dev libzip-dev lsof
 RUN apt-get install -y mailutils msmtp nodejs procps vim zip
 RUN apt-get install -y net-tools wget nano
+
+RUN npm install -g grunt-cli
 
 RUN pecl channel-update pecl.php.net && pecl install imagick redis ssh2-1.3.1 xdebug
 
@@ -23,10 +23,17 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY conf/php.ini $PHP_INI_DIR
 COPY conf/php-fpm.conf /usr/local/etc/
 COPY conf/www.conf /usr/local/etc/php-fpm.d/
+COPY conf/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN mkdir -p /adminer
 RUN wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql-en.php -O /adminer/index.php
 
 RUN mkdir -p /app
+RUN chown -R www-data:www-data /app
+RUN chmod -R 777 /app
+
+WORKDIR /app
+
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 9000

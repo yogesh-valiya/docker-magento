@@ -6,12 +6,33 @@
 
 Make sure you have the following installed on your system:
 
-- Install [Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
-- Install [Docker Compose](https://docs.docker.com/compose/install/linux/#install-using-the-repository)
+- Install and docker compose - [Guide](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+    ```shell
+    # Add Docker's official GPG key:
+    sudo apt-get update
+    sudo apt-get install ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    
+    # Add the repository to Apt sources:
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    
+    # Install Docker
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+    ```
 - Configure Docker to run as a non-root user,
-  following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-  .
-
+  following [these instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+    ```shell
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    newgrp docker
+    sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+    sudo chmod g+rwx "$HOME/.docker" -R
+    ```
 ### Disable Local Services
 
 To prevent conflicts, stop and disable the following services on your local machine:
@@ -29,14 +50,14 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
 1. Install Docker as described [here](#install-docker).
 2. Update `CODEBASE_PARENT_DIRECTORY` value in `.env` file with absolute path of the codebase parent directory.
     1. Later on all the codebase will be inside this directory.
-    2. This directory will be accessible inside the container at `/var/www/html/`.
+    2. This directory will be accessible inside the container at `/app/`.
 3. Run docker build command
     ```shell
-    `./bin/build.sh`
+    ./bin/build.sh
     ```
 4. Run docker start command
     ```shell
-    `./bin/start.sh`
+    ./bin/start.sh
     ```
 
 ### Set Up Adminer
@@ -75,6 +96,24 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
         set $FASTCGI_PASS php_82;
         set $MAGE_ROOT /app/magento-simple;
 
+        set $MAGE_MODE developer;
+    
+        access_log /var/log/nginx/magento-access.log;
+        error_log /var/log/nginx/magento-error.log;
+    
+        include /etc/nginx/default-magento.conf;
+    }
+
+       server {
+        listen 443 ssl;
+
+        server_name magento-simple.local;
+        set $FASTCGI_PASS php_82;
+        set $MAGE_ROOT /app/magento-simple;
+
+        ssl_certificate /etc/nginx/certs/local.crt;
+        ssl_certificate_key /etc/nginx/certs/local.key;
+   
         set $MAGE_MODE developer;
     
         access_log /var/log/nginx/magento-access.log;
@@ -138,6 +177,11 @@ sudo systemctl disable apache2 nginx mysql elasticsearch php7.4-fpm php8.0-fpm p
     ```
 7. Update base URL, static content URL and media URL if applicable form core config table with either `adminer.local` or
    MySQL CLI.
+    ```shell
+    UPDATE `core_config_data` SET `value` = 'https://halp-docker.local' WHERE `path` = 'web/unsecure/base_url';
+    UPDATE `core_config_data` SET `value` = 'http://halp-docker.local' WHERE `path` = 'web/secure/base_url';
+    DELETE FROM `core_config_data` WHERE `path` LIKE "web/%secure/base_static_url" OR `path` LIKE "web/%secure/base_media_url";
+    ```
 
 ## Folder Structure and Available Commands
 
@@ -346,15 +390,11 @@ rm  ~/.docker/config.json
 
 ![image](https://github.com/yogesh-valiya/docker-magento/assets/66505755/4ab4aec5-36c3-426f-ab51-9b83474f7e8a)
 
-Try to stop all docker containers
+Try to stop all docker containers, and start the docker again,
 
 ```
 docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
+bin/start.sh
 ```
-
-```bash
-Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:80 -> 0.0.0.0:0: listen tcp 0.0.0.0:80: bind: address already in use
-```
-
-Try to see if any service
+If this doesn't resolve the issue, try to see if any other service is using the same port, kill or stop services using that port should resolve the issue.

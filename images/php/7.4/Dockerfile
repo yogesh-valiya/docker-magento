@@ -1,7 +1,5 @@
 FROM php:7.4-fpm
 
-WORKDIR /var/www/html
-
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 
 RUN apt-get update
@@ -10,6 +8,8 @@ RUN apt-get install -y nano libjpeg62-turbo-dev libmagickwand-dev libmcrypt-dev 
 RUN apt-get install -y libpng-dev libsodium-dev libssh2-1-dev libwebp-dev libxslt1-dev libzip-dev lsof
 RUN apt-get install -y mailutils msmtp nodejs procps vim zip
 RUN apt-get install -y net-tools wget nano
+
+RUN npm install -g grunt-cli
 
 RUN pecl channel-update pecl.php.net && pecl install imagick redis ssh2-1.3.1 xdebug
 
@@ -28,5 +28,13 @@ RUN mkdir -p /adminer
 RUN wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql-en.php -O /adminer/index.php
 
 RUN mkdir -p /app
+RUN chown -R www-data:www-data /app
+RUN chmod -R 777 /app
+
+RUN mkdir -p /var/www/
+RUN touch /var/www/.bash_history
+RUN chown www-data /var/www/.bash_history
+
+WORKDIR /app
 
 EXPOSE 9000

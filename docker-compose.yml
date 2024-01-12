@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.7'
 
 services:
     opensearch_250:
@@ -72,6 +72,8 @@ services:
 
     php_74:
         container_name: "php_74"
+        environment:
+            HISTFILE: /app/.php_bash_history
         build:
             context: ./images/php/7.4
             dockerfile: ./Dockerfile
@@ -80,12 +82,14 @@ services:
             - "49000:9000"
         volumes:
             - "${CODEBASE_PARENT_DIRECTORY}:/app"
-            - ./code/adminer:/var/www/adminer
+            - php_74_nginx_logs:/var/log/nginx
         networks:
             - magento-network
 
     php_82:
         container_name: "php_82"
+        environment:
+            HISTFILE: /app/.php_bash_history
         build:
             context: ./images/php/8.2
             dockerfile: ./Dockerfile
@@ -94,7 +98,8 @@ services:
             - "49001:9000"
         volumes:
             - "${CODEBASE_PARENT_DIRECTORY}:/app"
-            - ./code/adminer:/var/www/adminer
+            - php_82_nginx_logs:/var/log/nginx
+
         networks:
             - magento-network
 
@@ -106,6 +111,7 @@ services:
         restart: unless-stopped
         ports:
             - "80:80"
+            - "443:443"
         volumes:
             - ./code/adminer:/var/www/adminer
             - "${CODEBASE_PARENT_DIRECTORY}:/app"
@@ -120,9 +126,10 @@ services:
 networks:
     magento-network:
         driver: bridge
-        enable_ipv6: false
 
 volumes:
     opensearch_250:
     elasticsearch_717:
     mysql_80:
+    php_74_nginx_logs:
+    php_82_nginx_logs:
